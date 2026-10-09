@@ -10,7 +10,7 @@ Não há build, servidor nem dependências. Abra o `index.html` no navegador (ou
 
 1. Preencha as seções; o painel lateral mostra o score ATS e os problemas em tempo real.
 2. Use **Pré-visualizar** para ver o currículo como será impresso.
-3. Clique em **Exportar PDF**, escolha **Salvar como PDF** no diálogo de impressão e desative "Cabeçalhos e rodapés".
+3. Clique em **Exportar PDF** e escolha **Salvar como PDF** no diálogo de impressão. O template zera a margem da página (`@page { margin: 0 }`) e usa padding no próprio currículo, então URL, data e numeração do navegador não entram no PDF. Se algum navegador ainda os mostrar, desmarque "Cabeçalhos e rodapés" no diálogo.
 
 Erros (campos obrigatórios, formatos inválidos) bloqueiam a exportação; avisos são só recomendações.
 

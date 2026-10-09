@@ -438,9 +438,11 @@ body.view-preview #print-area {
   }
 }
 
+/* Margem da página = 0: sem área de margem, o navegador não imprime URL, data, título
+   nem numeração. A margem visual vem do padding do #print-area (repetido em cada página). */
 @page {
   size: A4;
-  margin: 2cm;
+  margin: 0;
 }
 
 @media print {
@@ -464,8 +466,10 @@ body.view-preview #print-area {
     display: block;
     max-width: none;
     min-height: 0;
-    padding: 0;
+    padding: 2cm;
     border: 0;
     box-shadow: none;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 }
