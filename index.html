@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ATS Formatador</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <span class="brand">ATS Formatador</span>
+
+      <div class="resume-bar">
+        <label for="resume-select" class="sr-only">Currículo</label>
+        <select id="resume-select"></select>
+        <button type="button" class="btn btn-sm" data-top="new">Novo</button>
+        <button type="button" class="btn btn-sm" data-top="duplicate">Duplicar</button>
+        <button type="button" class="btn btn-sm" data-top="rename">Renomear</button>
+        <button type="button" class="btn btn-sm" data-top="delete">Excluir</button>
+        <button type="button" class="btn btn-sm" data-top="export">Exportar JSON</button>
+        <button type="button" class="btn btn-sm" data-top="import">Importar JSON</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
+    </header>
+
+    <main class="layout">
+      <div class="main-col">
+        <nav class="tabs" aria-label="Modo">
+          <button type="button" class="tab active" data-tab="edit">Editar</button>
+          <button type="button" class="tab" data-tab="preview">Pré-visualizar</button>
+          <span id="save-status" class="muted" role="status"></span>
+        </nav>
+
+        <div id="form"></div>
+        <article id="print-area" aria-label="Currículo"></article>
+      </div>
+
+      <aside class="side card">
+        <h2>Compatibilidade ATS</h2>
+        <div class="score">
+          <span id="score-value" class="score-value">0</span>
+          <span class="muted">/ 100</span>
+        </div>
+        <div id="score-bar" class="score-bar"><div></div></div>
+        <p id="score-summary" class="muted small"></p>
+
+        <button type="button" id="export-pdf" class="btn btn-primary btn-block">Exportar PDF</button>
+        <p class="muted small">
+          Abre o diálogo de impressão: escolha <strong>Salvar como PDF</strong> e desative cabeçalhos e rodapés. Erros
+          bloqueiam a exportação; avisos são recomendações.
+        </p>
+
+        <ul id="check-list" class="check-list"></ul>
+      </aside>
+    </main>
+
+    <script src="validator.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

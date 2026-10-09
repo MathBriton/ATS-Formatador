@@ -15,11 +15,11 @@ Uma aplicação web onde o usuário:
 
 - [ ] Formulário estruturado com seções fixas: Dados pessoais, Resumo profissional, Experiência, Formação, Habilidades, Idiomas.
 - [ ] Reordenação de itens dentro de cada seção (drag ou botões up/down).
-- [ ] Geração de PDF via template único, testado e validado (não WYSIWYG livre).
+- [ ] Geração de PDF via template único (HTML/CSS de impressão, não WYSIWYG livre).
 - [ ] Validador de compatibilidade ATS (checklist automática, ver seção 6).
 - [ ] Exportação do PDF final.
 - [ ] Salvar/editar múltiplas versões do currículo (para adaptar a vagas diferentes).
-- [ ] Autenticação simples (login para persistir dados).
+- [ ] Persistência local no navegador (`localStorage`) com exportar/importar JSON — sem login nem backend.
 
 ## 4. Fora do escopo (v2+)
 
@@ -101,30 +101,25 @@ Antes de exportar, rodar checklist automática client-side:
 
 Resultado: lista de ✅/⚠️ simples, não é IA — é regra determinística.
 
-## 8. Arquitetura sugerida
+## 8. Arquitetura
+
+Aplicação estática, sem build e sem backend:
 
 ```
-[Frontend: React + TypeScript]
-     ↓ form → JSON (contrato da seção 5)
-[Backend: .NET API]
-     ↓ valida JSON + aplica checklist ATS
-     ↓ renderiza template → PDF
-[Geração de PDF]
-     Opção A: QuestPDF (.NET) — gera PDF nativo, controle total sobre estrutura de texto (recomendado para ATS)
-     Opção B: HTML/CSS simples + engine headless (ex: Puppeteer/Playwright) — mais fácil de estilizar, mas exige disciplina para não gerar PDF rasterizado
-[Persistência: SQL Server — usuário salva múltiplas versões do currículo]
+index.html + style.css + app.js + validator.js
+     form → JSON (contrato da seção 5) → localStorage
+     validator.js → checklist ATS em tempo real
+     template HTML semântico + @media print → window.print() → "Salvar como PDF"
 ```
 
-Recomendação: **QuestPDF** dá mais garantia de texto real (não rasterizado) e controle fino sobre ordem de leitura — ponto crítico para ATS. HTML→PDF headless funciona, mas precisa validar que o texto não vira imagem.
+O navegador gera o PDF a partir de HTML real, então o texto é vetorial e selecionável (nunca rasterizado), e a ordem de leitura é a ordem do DOM. Versões múltiplas ficam no `localStorage`; exportar/importar JSON serve de backup.
 
 ## 9. Fluxo do usuário (MVP)
 
-1. Login/cadastro.
-2. Cria novo currículo → preenche formulário por seções.
-3. Sistema roda checklist ATS em tempo real (aviso inline).
-4. Usuário clica "Gerar PDF".
-5. Backend valida contrato JSON, renderiza template, retorna PDF.
-6. Usuário baixa o PDF, pode duplicar o currículo para adaptar a outra vaga.
+1. Abre a página e cria um novo currículo → preenche o formulário por seções.
+2. O sistema roda a checklist ATS em tempo real (aviso inline + painel de score).
+3. Usuário clica "Exportar PDF" e escolhe "Salvar como PDF" no diálogo de impressão.
+4. Pode duplicar o currículo para adaptar a outra vaga.
 
 ## 10. Critério de sucesso do MVP
 
