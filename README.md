@@ -27,7 +27,7 @@ validator.js   checklist ATS (única fonte das regras)
 
 - Tudo fica no `localStorage` do navegador; nada é enviado a servidor algum.
 - Você pode ter várias versões para adaptar o currículo a vagas diferentes. O nome do currículo é editável direto no topo; o menu **Arquivo** lista as versões e tem Novo, Duplicar e Excluir.
-- **Arquivo → Exportar JSON / Importar JSON** serve de backup e para levar o currículo a outro navegador ou dispositivo. Limpar os dados do navegador apaga as versões salvas, então exporte de vez em quando.
+- **Arquivo → Baixar / Abrir cópia de segurança** (um arquivo `.json`) serve de backup e para levar o currículo a outro navegador ou dispositivo. Limpar os dados do navegador apaga as versões salvas, então baixe uma cópia de vez em quando.
 
 ## Regras do template (seção 6 do MVP)
 
@@ -36,12 +36,12 @@ validator.js   checklist ATS (única fonte das regras)
 - Títulos fixos em texto: "Resumo Profissional", "Experiência Profissional", "Formação Acadêmica", "Habilidades", "Idiomas".
 - Datas `MM/AAAA`; término vazio vira "Atual".
 - Fonte Arial (fallback Helvetica / Liberation Sans), embutida pelo navegador no PDF.
-- Bullets como texto `• ` no próprio parágrafo; habilidades em um parágrafo separado por vírgula.
+- Tópicos como texto `• ` no próprio parágrafo; habilidades em um parágrafo separado por vírgula.
 
 ## Checklist ATS (seção 7 do MVP)
 
 - **Erros** (bloqueiam o PDF): nome, e-mail e telefone obrigatórios; e-mail válido; empresa/cargo por experiência; instituição/curso por formação; datas em `AAAA-MM`; nome de idioma.
-- **Avisos**: resumo fora de 200–600 caracteres; experiência sem bullet; bullet > 300 caracteres ou com emoji; campos longos demais; menos de 3 habilidades; término anterior ao início; localização vazia; URLs inválidas.
+- **Avisos**: resumo fora de 200–600 caracteres; experiência sem tópico; tópico > 300 caracteres ou com emoji; campos longos demais; menos de 3 habilidades; término anterior ao início; localização vazia; URLs inválidas.
 - Score = 100 − 15 × erros − 5 × avisos (mínimo 0).
 
 ## Fora do escopo (v2+)

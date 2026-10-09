@@ -25,6 +25,7 @@
   // Emoji / símbolos fora do BMP e "Other Symbol" (So): extratores costumam ler como lixo.
   const RISKY_GLYPH_RE = /[\p{So}\p{Co}]|[\uD800-\uDFFF]/u
 
+  const plural = (n, one, many) => (n === 1 ? one : many)
   const blank = (v) => !v || String(v).trim().length === 0
   const ok = (code, message) => ({ code, severity: 'ok', message })
   const warn = (code, message) => ({ code, severity: 'warning', message })
@@ -65,17 +66,17 @@
 
     if (blank(p.phone)) items.push(error('personal.phone.required', 'Telefone é obrigatório.'))
     else if (!PHONE_RE.test(p.phone.trim()))
-      items.push(warn('personal.phone.format', 'Telefone deve conter apenas dígitos, espaços, +, ( ) e -.'))
+      items.push(warn('personal.phone.format', 'Telefone deve conter apenas números, espaços, +, ( ) e -.'))
     else items.push(ok('personal.phone', 'Telefone preenchido.'))
 
     if (blank(p.location))
-      items.push(warn('personal.location.missing', 'Informe cidade e país: muitos ATS filtram por localização.'))
+      items.push(warn('personal.location.missing', 'Informe cidade e país: muitas empresas filtram candidatos por localização.'))
 
     if (!blank(p.linkedin) && !URL_RE.test(p.linkedin.trim()))
-      items.push(warn('personal.linkedin.format', 'LinkedIn deve ser uma URL (ex.: https://linkedin.com/in/seu-nome).'))
+      items.push(warn('personal.linkedin.format', 'O LinkedIn deve ser um endereço de site (ex.: https://linkedin.com/in/seu-nome).'))
 
     if (!blank(p.github) && !URL_RE.test(p.github.trim()))
-      items.push(warn('personal.github.format', 'GitHub deve ser uma URL (ex.: https://github.com/seu-usuario).'))
+      items.push(warn('personal.github.format', 'O GitHub deve ser um endereço de site (ex.: https://github.com/seu-usuario).'))
   }
 
   function validateSummary(summary, items) {
@@ -91,12 +92,20 @@
 
   function validateDateRange(prefix, label, start, end, items) {
     const startOk = isYearMonth(start)
-    if (!startOk) items.push(error(`${prefix}.startDate.format`, `${label}: data de início deve estar no formato AAAA-MM.`))
+    if (!startOk)
+      items.push(
+        error(
+          `${prefix}.startDate.format`,
+          blank(start)
+            ? `${label}: informe o mês e o ano de início.`
+            : `${label}: data de início inválida (use o formato AAAA-MM, ex.: 2022-03).`,
+        ),
+      )
 
     if (blank(end)) return
 
     if (!isYearMonth(end)) {
-      items.push(error(`${prefix}.endDate.format`, `${label}: data de término deve estar no formato AAAA-MM ou vazia (atual).`))
+      items.push(error(`${prefix}.endDate.format`, `${label}: data de término inválida (use AAAA-MM, ex.: 2024-12, ou deixe vazio se for atual).`))
       return
     }
 
@@ -126,16 +135,16 @@
 
       const bullets = e.bullets.filter((b) => !blank(b))
       if (bullets.length === 0)
-        items.push(warn(`${prefix}.bullets.empty`, `${label}: adicione pelo menos 1 bullet com resultado/responsabilidade.`))
+        items.push(warn(`${prefix}.bullets.empty`, `${label}: adicione pelo menos 1 tópico com uma responsabilidade ou conquista.`))
       else if (bullets.length > LIMITS.maxBulletsPerExperience)
-        items.push(warn(`${prefix}.bullets.many`, `${label}: muitos bullets (${bullets.length}). Recomendado até ${LIMITS.maxBulletsPerExperience}.`))
-      else items.push(ok(`${prefix}.bullets`, `${label}: ${bullets.length} bullet(s).`))
+        items.push(warn(`${prefix}.bullets.many`, `${label}: muitos tópicos (${bullets.length}). Recomendado até ${LIMITS.maxBulletsPerExperience}.`))
+      else items.push(ok(`${prefix}.bullets`, `${label}: ${bullets.length} ${plural(bullets.length, 'tópico', 'tópicos')}.`))
 
       e.bullets.forEach((b, bi) => {
         if (b.trim().length > LIMITS.bulletMax)
-          items.push(warn(`${prefix}.bullets[${bi}].length`, `${label}: bullet #${bi + 1} com mais de ${LIMITS.bulletMax} caracteres.`))
+          items.push(warn(`${prefix}.bullets[${bi}].length`, `${label}: o tópico ${bi + 1} está muito longo (mais de ${LIMITS.bulletMax} caracteres). Prefira frases curtas.`))
         if (RISKY_GLYPH_RE.test(b))
-          items.push(warn(`${prefix}.bullets[${bi}].glyphs`, `${label}: bullet #${bi + 1} contém emoji/símbolos que parsers ATS podem não ler.`))
+          items.push(warn(`${prefix}.bullets[${bi}].glyphs`, `${label}: o tópico ${bi + 1} contém emoji ou símbolos especiais que os sistemas de triagem podem não ler.`))
       })
     })
   }
@@ -159,14 +168,14 @@
 
   function validateSkills(skills, items) {
     if (skills.filter((s) => !blank(s)).length === 0)
-      items.push(warn('skills.empty', 'Nenhuma habilidade informada. ATS costumam casar palavras-chave desta seção com a vaga.'))
+      items.push(warn('skills.empty', 'Nenhuma habilidade informada. Os sistemas de triagem comparam as palavras desta seção com as da vaga.'))
     else if (skills.length < LIMITS.minSkills)
       items.push(warn('skills.few', `Poucas habilidades (${skills.length}). Recomendado pelo menos ${LIMITS.minSkills}.`))
     else items.push(ok('skills', `${skills.length} habilidades informadas.`))
 
     skills.forEach((s, i) => {
       if (s.trim().length > LIMITS.skillMax)
-        items.push(warn(`skills[${i}].length`, `Habilidade "${s}" muito longa (máx. ${LIMITS.skillMax}). Prefira palavras-chave curtas.`))
+        items.push(warn(`skills[${i}].length`, `Habilidade "${s}" muito longa (máx. ${LIMITS.skillMax}). Prefira termos curtos.`))
     })
   }
 

@@ -28,6 +28,7 @@
     bullets: () => '',
   }
 
+  const plural = (n, one, many) => (n === 1 ? one : many)
   const str = (v) => (typeof v === 'string' ? v : '')
   const arr = (v) => (Array.isArray(v) ? v : [])
 
@@ -92,7 +93,7 @@
       localStorage.setItem(STORE_KEY, JSON.stringify(state))
       setStatus('Salvo no navegador')
     } catch {
-      setStatus('Não foi possível salvar (armazenamento indisponível). Use "Exportar JSON".')
+      setStatus('Não foi possível salvar neste navegador. Use "Baixar cópia de segurança" no menu Arquivo.')
     }
   }
 
@@ -154,8 +155,8 @@
       `<button type="button" class="icon-btn" data-action="${action}" data-list="${list}" data-index="${index}" ${extra}
         aria-label="${aria}" ${disabled ? 'disabled' : ''}>${text}</button>`
     return `<div class="controls">
-      ${btn('move', 'data-dir="-1"', dirs[0], `Mover ${label} para trás`, index === 0)}
-      ${btn('move', 'data-dir="1"', dirs[1], `Mover ${label} para frente`, index === count - 1)}
+      ${btn('move', 'data-dir="-1"', dirs[0], `Mover ${label} para cima`, index === 0)}
+      ${btn('move', 'data-dir="1"', dirs[1], `Mover ${label} para baixo`, index === count - 1)}
       ${btn('remove', '', '✕', `Remover ${label}`, false)}
     </div>`
   }
@@ -192,7 +193,7 @@
         area: true,
         rows: 5,
         issue: 'summary',
-        hint: `Texto puro, 3 a 5 linhas (${V.LIMITS.summaryMin}–${V.LIMITS.summaryMax} caracteres). <span id="summary-count">${len}</span> atualmente.`,
+        hint: `Ideal: 3 a 5 linhas (${V.LIMITS.summaryMin} a ${V.LIMITS.summaryMax} caracteres). Agora: <span id="summary-count">${len}</span>.`,
       })}
     </section>`
   }
@@ -207,11 +208,11 @@
           .map(
             (b, bi) => `<div class="bullet-row">
               <div>
-                <textarea data-path="${p}.bullets.${bi}" rows="2" aria-label="Bullet ${bi + 1}"
-                  placeholder="Ex.: Reduzi o tempo de build em 40% ao migrar o pipeline de CI.">${esc(b)}</textarea>
+                <textarea data-path="${p}.bullets.${bi}" rows="2" aria-label="Tópico ${bi + 1}"
+                  placeholder="Ex.: Aumentei as vendas da loja em 20% em seis meses com uma nova campanha.">${esc(b)}</textarea>
                 <span class="issue" data-issue="${ip}.bullets[${bi}]."></span>
               </div>
-              ${controls(`${p}.bullets`, bi, e.bullets.length, 'bullet')}
+              ${controls(`${p}.bullets`, bi, e.bullets.length, 'tópico')}
             </div>`,
           )
           .join('')
@@ -225,20 +226,21 @@
             ${field({ label: 'Empresa *', path: `${p}.company`, issue: `${ip}.company.` })}
           </div>
           <div class="grid-2">
-            ${field({ label: 'Início *', path: `${p}.startDate`, type: 'month', issue: `${ip}.startDate.` })}
+            ${field({ label: 'Início *', path: `${p}.startDate`, type: 'month', placeholder: 'AAAA-MM', issue: `${ip}.startDate.` })}
             <div class="row end-row">
-              ${field({ label: 'Término', path: `${p}.endDate`, type: 'month', issue: `${ip}.endDate. ${ip}.dates.`, disabled: isCurrent })}
+              ${field({ label: 'Término', path: `${p}.endDate`, type: 'month', placeholder: 'AAAA-MM', issue: `${ip}.endDate. ${ip}.dates.`, disabled: isCurrent })}
               <label class="inline-check">
-                <input type="checkbox" data-action="toggle-current" data-path="${p}.endDate" ${isCurrent ? 'checked' : ''} /> Atual
+                <input type="checkbox" data-action="toggle-current" data-path="${p}.endDate" ${isCurrent ? 'checked' : ''} /> Emprego atual
               </label>
             </div>
           </div>
           ${field({ label: 'Localização', path: `${p}.location`, hint: 'Cidade, país ou Remoto' })}
           <div class="field">
-            <label>Responsabilidades e resultados (bullets)</label>
+            <label>Responsabilidades e resultados</label>
+            <small class="muted">Escreva um tópico para cada responsabilidade ou conquista. Se puder, use números.</small>
             ${bullets}
             <div class="row">
-              <button type="button" class="btn btn-sm" data-action="add" data-list="${p}.bullets">+ Bullet</button>
+              <button type="button" class="btn btn-sm" data-action="add" data-list="${p}.bullets">+ Adicionar tópico</button>
               <span class="issue" data-issue="${ip}.bullets."></span>
             </div>
           </div>
@@ -271,8 +273,8 @@
             ${field({ label: 'Instituição *', path: `${p}.institution`, issue: `${ip}.institution.` })}
           </div>
           <div class="grid-2">
-            ${field({ label: 'Início *', path: `${p}.startDate`, type: 'month', issue: `${ip}.startDate.` })}
-            ${field({ label: 'Término', path: `${p}.endDate`, type: 'month', hint: 'Vazio = Atual', issue: `${ip}.endDate. ${ip}.dates.` })}
+            ${field({ label: 'Início *', path: `${p}.startDate`, type: 'month', placeholder: 'AAAA-MM', issue: `${ip}.startDate.` })}
+            ${field({ label: 'Término', path: `${p}.endDate`, type: 'month', placeholder: 'AAAA-MM', hint: 'Deixe vazio se ainda estiver cursando', issue: `${ip}.endDate. ${ip}.dates.` })}
           </div>
         </div>`
       })
@@ -302,11 +304,11 @@
 
     return `<section class="card">
       <h2>Habilidades</h2>
-      <p class="muted">Palavras-chave curtas (tecnologias, ferramentas, competências). No PDF saem em uma lista separada por vírgula, sem colunas.</p>
+      <p class="muted">Escreva cada habilidade em poucas palavras (ex.: Excel, Atendimento ao cliente, Vendas). No PDF elas aparecem em uma única linha, separadas por vírgula.</p>
       <div class="field">
         <label for="skill-draft">Adicionar habilidade</label>
         <div class="row">
-          <input id="skill-draft" placeholder="Ex.: C#, React, SQL (Enter ou vírgula para adicionar)" />
+          <input id="skill-draft" placeholder="Ex.: Excel, Atendimento ao cliente, Vendas (Enter ou vírgula para adicionar)" />
           <button type="button" class="btn" data-action="add-skill">Adicionar</button>
         </div>
         <span class="issue" data-issue="skills."></span>
@@ -387,9 +389,9 @@
     const bar = $('#score-bar')
     bar.className = 'score-bar ' + (report.score >= 80 ? 'score-good' : report.score >= 50 ? 'score-mid' : 'score-bad')
     bar.firstElementChild.style.width = report.score + '%'
-    $('#score-summary').textContent = `${report.errors} erro(s) · ${report.warnings} aviso(s).`
+    $('#score-summary').textContent = `${report.errors} ${plural(report.errors, 'erro', 'erros')} · ${report.warnings} ${plural(report.warnings, 'aviso', 'avisos')}.`
     $('#export-pdf').disabled = !report.passed
-    $('#export-pdf').title = report.passed ? 'Abre o diálogo de impressão para salvar o PDF' : 'Corrija os erros antes de exportar'
+    $('#export-pdf').title = report.passed ? 'Abre a janela de impressão para salvar o PDF' : 'Corrija os erros antes de exportar'
 
     const sorted = [...report.items].sort((a, b) => ORDER[a.severity] - ORDER[b.severity])
     $('#check-list').innerHTML = sorted
@@ -525,8 +527,8 @@
       ${menuItem('Novo currículo', 'data-top="new"', { icon: '+' })}
       ${menuItem('Duplicar', 'data-top="duplicate"', { icon: '⧉' })}
       <hr class="menu-sep" />
-      ${menuItem('Importar JSON', 'data-top="import"', { icon: '↑' })}
-      ${menuItem('Exportar JSON', 'data-top="export"', { icon: '↓' })}
+      ${menuItem('Abrir cópia de segurança', 'data-top="import"', { icon: '↑' })}
+      ${menuItem('Baixar cópia de segurança', 'data-top="export"', { icon: '↓' })}
       <hr class="menu-sep" />
       ${menuItem('Excluir currículo', 'data-top="delete"', { icon: '✕', danger: true })}`
   }
@@ -588,7 +590,7 @@
       const title = hasWrapper && clean(raw.title) ? clean(raw.title) : file.name.replace(/\.json$/i, '')
       addResume(title, normalize(hasWrapper ? raw.data : raw))
     } catch {
-      alert('Arquivo inválido: não foi possível ler o JSON do currículo.')
+      alert('Arquivo inválido: não foi possível ler este arquivo como uma cópia de segurança de currículo.')
     }
   }
 
