@@ -26,8 +26,8 @@ validator.js   checklist ATS (única fonte das regras)
 ## Dados e versões
 
 - Tudo fica no `localStorage` do navegador; nada é enviado a servidor algum.
-- Você pode ter várias versões (Novo, Duplicar, Renomear, Excluir) para adaptar o currículo a vagas diferentes.
-- **Exportar JSON / Importar JSON** serve de backup e para levar o currículo a outro navegador ou dispositivo. Limpar os dados do navegador apaga as versões salvas, então exporte de vez em quando.
+- Você pode ter várias versões para adaptar o currículo a vagas diferentes. O nome do currículo é editável direto no topo; o menu **Arquivo** lista as versões e tem Novo, Duplicar e Excluir.
+- **Arquivo → Exportar JSON / Importar JSON** serve de backup e para levar o currículo a outro navegador ou dispositivo. Limpar os dados do navegador apaga as versões salvas, então exporte de vez em quando.
 
 ## Regras do template (seção 6 do MVP)
 

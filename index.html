@@ -8,19 +8,30 @@
   </head>
   <body>
     <header class="topbar">
-      <span class="brand">ATS Formatador</span>
-
-      <div class="resume-bar">
-        <label for="resume-select" class="sr-only">Currículo</label>
-        <select id="resume-select"></select>
-        <button type="button" class="btn btn-sm" data-top="new">Novo</button>
-        <button type="button" class="btn btn-sm" data-top="duplicate">Duplicar</button>
-        <button type="button" class="btn btn-sm" data-top="rename">Renomear</button>
-        <button type="button" class="btn btn-sm" data-top="delete">Excluir</button>
-        <button type="button" class="btn btn-sm" data-top="export">Exportar JSON</button>
-        <button type="button" class="btn btn-sm" data-top="import">Importar JSON</button>
-        <input type="file" id="import-file" accept="application/json,.json" hidden />
+      <div class="topbar-left">
+        <svg class="logo" viewBox="0 0 28 28" width="28" height="28" aria-hidden="true">
+          <rect width="28" height="28" rx="7" fill="currentColor" />
+          <path d="M9 8h10M9 12h10M9 16h6" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" />
+          <path d="m15.5 20 2 2 4-4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        </svg>
+        <div class="doc-info">
+          <label class="sr-only" for="resume-title">Nome do currículo</label>
+          <input id="resume-title" class="title-input" maxlength="80" spellcheck="false" autocomplete="off" />
+          <div class="doc-sub"><span class="brand">ATS Formatador</span><span id="save-status" role="status"></span></div>
+        </div>
       </div>
+
+      <div class="topbar-right">
+        <div class="menu-wrap">
+          <button type="button" id="file-menu-btn" class="btn" aria-haspopup="menu" aria-expanded="false" aria-controls="file-menu">
+            Arquivo <span aria-hidden="true">▾</span>
+          </button>
+          <div id="file-menu" class="menu" role="menu" aria-label="Arquivo" hidden></div>
+        </div>
+        <button type="button" id="export-pdf" class="btn btn-primary" aria-label="Exportar PDF"><span class="hide-sm">Exportar </span>PDF</button>
+      </div>
+
+      <input type="file" id="import-file" accept="application/json,.json" hidden />
     </header>
 
     <main class="layout">
@@ -28,7 +39,6 @@
         <nav class="tabs" aria-label="Modo">
           <button type="button" class="tab active" data-tab="edit">Editar</button>
           <button type="button" class="tab" data-tab="preview">Pré-visualizar</button>
-          <span id="save-status" class="muted" role="status"></span>
         </nav>
 
         <div id="form"></div>
@@ -44,10 +54,10 @@
         <div id="score-bar" class="score-bar"><div></div></div>
         <p id="score-summary" class="muted small"></p>
 
-        <button type="button" id="export-pdf" class="btn btn-primary btn-block">Exportar PDF</button>
         <p class="muted small">
-          Abre o diálogo de impressão: escolha <strong>Salvar como PDF</strong>. Se aparecerem cabeçalhos e rodapés
-          (URL, data), desmarque essa opção. Erros bloqueiam a exportação; avisos são recomendações.
+          Use <strong>Exportar PDF</strong> no topo: abre o diálogo de impressão, onde você escolhe
+          <strong>Salvar como PDF</strong>. Se aparecerem cabeçalhos e rodapés (URL, data), desmarque essa opção.
+          Erros bloqueiam a exportação; avisos são recomendações.
         </p>
 
         <ul id="check-list" class="check-list"></ul>

@@ -90,7 +90,7 @@
   function persist() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state))
-      setStatus('Salvo neste navegador')
+      setStatus('Salvo no navegador')
     } catch {
       setStatus('Não foi possível salvar (armazenamento indisponível). Use "Exportar JSON".')
     }
@@ -494,17 +494,52 @@
     window.print()
   }
 
-  // ---------- Barra de currículos (várias versões) ----------
+  // ---------- Topbar: título editável + menu Arquivo (várias versões) ----------
 
-  function renderResumeBar() {
-    $('#resume-select').innerHTML = state.resumes
-      .map((r) => `<option value="${esc(r.id)}" ${r.id === state.currentId ? 'selected' : ''}>${esc(r.title)}</option>`)
-      .join('')
+  const titleInput = $('#resume-title')
+  const menuBtn = $('#file-menu-btn')
+  const menu = $('#file-menu')
+
+  function menuItem(label, attrs, { icon = '', danger = false, role = 'menuitem' } = {}) {
+    return `<button type="button" role="${role}" class="menu-item${danger ? ' danger' : ''}" ${attrs}>
+      <span class="menu-icon" aria-hidden="true">${icon}</span>${label}
+    </button>`
+  }
+
+  function renderTopbar() {
+    titleInput.value = current().title
+    menu.innerHTML = `
+      <div class="menu-label">Meus currículos</div>
+      <div class="menu-list">
+        ${state.resumes
+          .map((r) => {
+            const active = r.id === state.currentId
+            return menuItem(esc(r.title), `data-resume="${esc(r.id)}" aria-checked="${active}"`, {
+              icon: active ? '✓' : '',
+              role: 'menuitemradio',
+            })
+          })
+          .join('')}
+      </div>
+      <hr class="menu-sep" />
+      ${menuItem('Novo currículo', 'data-top="new"', { icon: '+' })}
+      ${menuItem('Duplicar', 'data-top="duplicate"', { icon: '⧉' })}
+      <hr class="menu-sep" />
+      ${menuItem('Importar JSON', 'data-top="import"', { icon: '↑' })}
+      ${menuItem('Exportar JSON', 'data-top="export"', { icon: '↓' })}
+      <hr class="menu-sep" />
+      ${menuItem('Excluir currículo', 'data-top="delete"', { icon: '✕', danger: true })}`
+  }
+
+  function setMenu(open, focusFirst = false) {
+    menu.hidden = !open
+    menuBtn.setAttribute('aria-expanded', String(open))
+    if (open && focusFirst) menu.querySelector('.menu-item')?.focus()
   }
 
   function switchTo(id) {
     state.currentId = id
-    renderResumeBar()
+    renderTopbar()
     renderForm()
     persist()
   }
@@ -515,7 +550,13 @@
     switchTo(r.id)
   }
 
-  const slug = (s) => clean(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'curriculo'
+  const slug = (s) =>
+    clean(s)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'curriculo'
 
   function topAction(action) {
     const cur = current()
@@ -523,14 +564,6 @@
       addResume(`Currículo ${state.resumes.length + 1}`)
     } else if (action === 'duplicate') {
       addResume(`${cur.title} (cópia)`, JSON.parse(JSON.stringify(cur.data)))
-    } else if (action === 'rename') {
-      const title = prompt('Novo nome do currículo:', cur.title)
-      if (title && clean(title)) {
-        cur.title = clean(title)
-        cur.updatedAt = new Date().toISOString()
-        renderResumeBar()
-        persist()
-      }
     } else if (action === 'delete') {
       if (!confirm(`Excluir "${cur.title}"? Esta ação não pode ser desfeita.`)) return
       state.resumes = state.resumes.filter((r) => r.id !== cur.id)
@@ -627,11 +660,58 @@
     }
   })
 
-  $('#resume-select').addEventListener('change', (e) => switchTo(e.target.value))
+  // Título inline: renomeia sem diálogo; vazio volta para um nome padrão ao sair do campo.
+  titleInput.addEventListener('input', () => {
+    current().title = titleInput.value
+    current().updatedAt = new Date().toISOString()
+    scheduleSave()
+  })
+  titleInput.addEventListener('blur', () => {
+    current().title = clean(titleInput.value) || 'Currículo sem título'
+    renderTopbar()
+    persist()
+  })
+  titleInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') titleInput.blur()
+  })
 
-  document.querySelector('.resume-bar').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-top]')
-    if (btn) topAction(btn.dataset.top)
+  menuBtn.addEventListener('click', () => setMenu(menu.hidden, true))
+
+  menu.addEventListener('click', (e) => {
+    const item = e.target.closest('.menu-item')
+    if (!item) return
+    setMenu(false)
+    menuBtn.focus()
+    if (item.dataset.resume) switchTo(item.dataset.resume)
+    else if (item.dataset.top) topAction(item.dataset.top)
+  })
+
+  document.addEventListener('click', (e) => {
+    if (!menu.hidden && !e.target.closest('.menu-wrap')) setMenu(false)
+  })
+
+  document.addEventListener('keydown', (e) => {
+    if (menu.hidden) return
+    const items = [...menu.querySelectorAll('.menu-item')]
+    const i = items.indexOf(document.activeElement)
+    if (e.key === 'Escape') {
+      setMenu(false)
+      menuBtn.focus()
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      items[(i + 1) % items.length].focus()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      items[(i - 1 + items.length) % items.length].focus()
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      items[0].focus()
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      items[items.length - 1].focus()
+    } else if (e.key === 'Tab') {
+      setMenu(false)
+    }
   })
 
   $('#import-file').addEventListener('change', (e) => {
@@ -656,6 +736,6 @@
 
   // ---------- Início ----------
 
-  renderResumeBar()
+  renderTopbar()
   renderForm()
 })()
