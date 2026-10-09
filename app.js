@@ -282,7 +282,7 @@
 
     return `<section class="card">
       <div class="card-header">
-        <h2>Formação acadêmica</h2>
+        <h2>Formações e cursos</h2>
         <button type="button" class="btn btn-sm" data-action="add" data-list="education">+ Adicionar formação</button>
       </div>
       ${d.education.length === 0 ? '<p class="muted">Nenhuma formação ainda. <span class="issue" data-issue="education.empty"></span></p>' : ''}
@@ -406,7 +406,7 @@
   const SECTION = {
     summary: 'Resumo Profissional',
     experience: 'Experiência Profissional',
-    education: 'Formação Acadêmica',
+    education: 'Formações e Cursos',
     skills: 'Habilidades',
     languages: 'Idiomas',
   }

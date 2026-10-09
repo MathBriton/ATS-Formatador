@@ -33,7 +33,7 @@ validator.js   checklist ATS (única fonte das regras)
 
 - Layout single-column; ordem de leitura = ordem do DOM.
 - Sem tabelas, colunas, ícones, imagens, cabeçalho/rodapé nem `position: absolute`.
-- Títulos fixos em texto: "Resumo Profissional", "Experiência Profissional", "Formação Acadêmica", "Habilidades", "Idiomas".
+- Títulos fixos em texto: "Resumo Profissional", "Experiência Profissional", "Formações e Cursos", "Habilidades", "Idiomas".
 - Datas `MM/AAAA`; término vazio vira "Atual".
 - Fonte Arial (fallback Helvetica / Liberation Sans), embutida pelo navegador no PDF.
 - Tópicos como texto `• ` no próprio parágrafo; habilidades em um parágrafo separado por vírgula.
